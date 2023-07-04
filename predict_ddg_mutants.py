@@ -20,6 +20,8 @@ def estimate_ddg(wt_pose_id, mutant,
     if os.path.exists(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv'):
         return pd.read_csv(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv')
     else:
+        # Create placeholder file to prevent other processes working on this mutant
+        open(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv', 'a').close()
         utils.init_pyrosetta()
 
         # setup score functions
