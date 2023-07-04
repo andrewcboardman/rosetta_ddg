@@ -14,6 +14,9 @@ def estimate_ddg(wt_pose_id, mutant,
                  mutant_pose_filepath = '../examples/mutants/', 
                  scorefxn_names = ['franklin2019','elec', 'van_der_waals','solvation'], relax_wt=False, relax_mutant=True, relax_params = None):
     # Start PyRosetta
+    if not os.path.exists(mutant_pose_filepath):
+        os.mkdir(mutant_pose_filepath)
+
     if os.path.exists(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv'):
         return pd.read_csv(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv')
     else:
