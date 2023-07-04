@@ -5,6 +5,7 @@ from functools import partial
 import pandas as pd
 import argparse
 import utils
+import json
 
 
 def check_valid_mutant(pose, mutant):
@@ -58,6 +59,8 @@ def estimate_ddg(wt_pose_id, mutants,
             'score_name': score_name,
             'E_wt': E_wt
         })
+    with open(f'{mutant_pose_filepath}/{wt_pose_id}_wt.json', 'w') as f:
+        json.dump(wt_scores, f)
     
     for mutant in tqdm(mutants): 
         # Mutate residue
@@ -74,17 +77,20 @@ def estimate_ddg(wt_pose_id, mutants,
         mutant_pose.dump_pdb(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.pdb')
 
         # Score mutant pose
+        mutant_scores_ = []
         for score_name, scorefxn in scorefxns.items():
             E_mut = scorefxn.score(mutant_pose)
-            mutant_scores.append(
-                {
+            mutant_scores_.append({
                     'decoy': wt_pose_id,
                     'mutant': mutant,
                     'score_name': score_name,
                     'E_mut': E_mut
-                }
-            )
-
+            })
+        with open(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.json', 'w') as f:
+            json.dump(mutant_scores_, f)
+        for score in mutant_scores_:
+            mutant_scores.append(score)
+        
     mutant_scores = pd.DataFrame(mutant_scores)
     wt_scores = pd.DataFrame(wt_scores)
     mutant_scores = mutant_scores.merge(wt_scores, on=['decoy', 'score_name'])
