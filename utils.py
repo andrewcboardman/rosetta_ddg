@@ -8,6 +8,18 @@ from pyrosetta.rosetta.core.chemical import aa_from_oneletter_code
 from pyrosetta.rosetta.protocols.minimization_packing import PackRotamersMover
 
 
+def check_valid_mutant(pose, mutant):
+    pos = int(mutant[1:-1])
+    if (pose.total_residue() < pos) or (pos < 1):
+        return False
+    elif not (mutant[-1] in 'ACDEFGHIKLMNPQRSTVWY'):
+        return False
+    elif not pose.residue(pos).name1() == mutant[0]:
+        return False
+    else:
+        return True
+
+
 # Utility functions
 def init_pyrosetta():
     pr.init(

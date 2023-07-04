@@ -8,18 +8,6 @@ import utils
 import json
 
 
-def check_valid_mutant(pose, mutant):
-    pos = int(mutant[1:-1])
-    if (pose.total_residue() < pos) or (pos < 1):
-        return False
-    elif not (mutant[-1] in 'ACDEFGHIKLMNPQRSTVWY'):
-        return False
-    elif not pose.residue(pos).name1() == mutant[0]:
-        return False
-    else:
-        return True
-
-
 def estimate_ddg(wt_pose_id, mutants, 
                  wt_pose_filepath='../examples/wt_relax/', 
                  mutant_pose_filepath = '../examples/mutants/', 
