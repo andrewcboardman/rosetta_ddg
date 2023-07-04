@@ -89,7 +89,7 @@ def estimate_ddg(wt_pose_id, mutants,
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i','--input',action='store',help='Input directory containing relaxed structures')
-    parser.add_argument('-o','--output',action='store',help='Output file')
+    parser.add_argument('-o','--output',action='store',help='Output directory for mutant decoys and scores')
     parser.add_argument('-m','--mutants',action='store',help='Mutants file')
     parser.add_argument('-j','--n_workers',action='store',type=int,help='Number of workers')
     args = parser.parse_args()
@@ -106,13 +106,17 @@ def main():
     # Mutate and estimate ddG
     # Parallelise this step over decoy inputs, not mutants
     with Pool(args.n_workers) as p:
-        estimate_ddg_partial = partial(estimate_ddg, wt_pose_filepath =args.input, mutant_pose_filepath = '.', mutants = mutants_list, relax_wt = True, relax_mutant = True)
+        estimate_ddg_partial = partial(
+            estimate_ddg, 
+            wt_pose_filepath =args.input, mutant_pose_filepath = args.output, 
+            mutants = mutants_list, relax_wt = False, relax_mutant = True
+            )
         ddg_results_decoy = p.map(estimate_ddg_partial, decoy_ids)
     
     # Aggregate results and merge with input data
     ddg_results = pd.concat(ddg_results_decoy,axis=0)
     ddg_results = ddg_results.merge(mutants,on = 'rosetta_mutant',how = 'right')
-    ddg_results.to_csv(args.output,index=False)
+    ddg_results.to_csv(f"{args.output}/ddg.csv",index=False)
 
 if __name__ == '__main__':
     main()
