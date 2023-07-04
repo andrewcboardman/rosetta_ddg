@@ -10,18 +10,28 @@ import shutil
 
 def relax_wt(input_structure, output_path, index, 
              scorefxn = 'franklin2019', sample_level = 'chi', cycles = 1, constrained=True, cartesian = False, ):
-    utils.init_pyrosetta()
-    scorefxns = utils.initiate_scorefunction([scorefxn])    
-    wt_pose = utils.load_pose_and_membrane(input_structure)
-
-    wt_pose = utils.relax_pose(
-            wt_pose, scorefxns[scorefxn], 
-            target_position=1, radius = 1000, sample_level=sample_level, cycles=cycles, cartesian=cartesian, constrained=constrained
-        )
     
-    E_wt = scorefxns[scorefxn].score(wt_pose)
     input_name = os.path.basename(input_structure).split('.')[0]
-    wt_pose.dump_pdb(f'{output_path}/{input_name}_{index}.pdb')
+
+    if os.path.exists(f'{output_path}/{input_name}_{index}.pdb'):
+        utils.init_pyrosetta()
+        scorefxns = utils.initiate_scorefunction([scorefxn])    
+        wt_pose = utils.load_pose_and_membrane(f'{output_path}/{input_name}_{index}.pdb')
+        E_wt = scorefxns[scorefxn].score(wt_pose)
+        return E_wt
+    else:
+        utils.init_pyrosetta()
+        scorefxns = utils.initiate_scorefunction([scorefxn])    
+        wt_pose = utils.load_pose_and_membrane(input_structure)
+
+        wt_pose = utils.relax_pose(
+                wt_pose, scorefxns[scorefxn], 
+                target_position=1, radius = 1000, sample_level=sample_level, cycles=cycles, cartesian=cartesian, constrained=constrained
+            )
+        
+        E_wt = scorefxns[scorefxn].score(wt_pose)
+        
+        wt_pose.dump_pdb(f'{output_path}/{input_name}_{index}.pdb')
     return E_wt
 
     
