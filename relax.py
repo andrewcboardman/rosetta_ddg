@@ -32,10 +32,11 @@ def filter_relaxed_structures(E_wt, iter, input_structure, structures_path, n_se
     df['iter'] = iter
     df.sort_values('E_wt',inplace=True)
     df.to_csv(f'{structures_path}/relax_wt_scores.csv',index=False)
-    if n_select < len(iter):
+    if n_select <= len(iter):
         df_select = df.head(n_select)
         selected_structures = df_select['iter'].tolist()
-    os.mkdir(f'{structures_path}/select')
+    if not os.path.exists(f'{structures_path}/select'):
+        os.mkdir(f'{structures_path}/select')
     
     input_name = os.path.basename(input_structure).split('.')[0]
     for i in selected_structures:
