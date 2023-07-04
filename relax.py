@@ -32,7 +32,7 @@ def relax_wt(input_structure, output_path, index,
         E_wt = scorefxns[scorefxn].score(wt_pose)
         
         wt_pose.dump_pdb(f'{output_path}/{input_name}_{index}.pdb')
-    return E_wt
+        return E_wt 
 
     
 def filter_relaxed_structures(E_wt, iter, input_structure, structures_path, n_select=10):
