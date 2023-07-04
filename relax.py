@@ -47,7 +47,7 @@ def filter_relaxed_structures(E_wt, iter, input_structure, structures_path, n_se
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Relax a wild-type structure')
-    parser.add_argument('input_structure', help='PDB file containing the structure to relax')
+    parser.add_argument('-i', '--input_structure', help='PDB file containing the structure to relax')
     parser.add_argument('-o', '--output_path', default='./relax', help='Output file name')
     parser.add_argument('-N', '--n_struct', default=1, type=int, help='Number of structures to generate')
     parser.add_argument('-n', '--n_select', default=1, type=int, help='Number of structures to select')
