@@ -10,7 +10,7 @@ def main():
     args = parser.parse_args()
     mutants = []
     for file in os.listdir(args.input):
-        if file.endswith('.csv') and len(open(file,'r').readlines()) > 0:
+        if file.endswith('.csv') and len(open(f"{args.input}/{file}",'r').readlines()) > 0:
             mutants.append(pd.read_csv(f"{args.input}/{file}"))
 
     ddg_results = pd.concat(mutants,axis=0)
