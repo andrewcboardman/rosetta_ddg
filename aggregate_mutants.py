@@ -17,7 +17,7 @@ def main():
     ddg_results = pd.concat(ddg_results,axis=0)
 
     mutants = pd.read_csv(args.mutants)
-    ddg_results = ddg_results.merge(mutants,on = 'rosetta_mutant',how = 'right')
+    ddg_results = ddg_results.merge(mutants,left_on='mutant',right_on = 'rosetta_mutant',how = 'right')
     ddg_results.to_csv(args.output,index=False)
 
 if __name__ == '__main__':
