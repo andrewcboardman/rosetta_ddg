@@ -9,7 +9,7 @@ import shutil
 
 
 def relax_wt(input_structure, output_path, index, 
-             scorefxn = 'franklin2019', sample_level = 'chi', cycles = 1, constrained=True, cartesian = False, ):
+             scorefxn = 'franklin2019', sample_level = 'chi', cycles = 1, constrained=True, ramp_constraints=False, cartesian = False, ):
     
     input_name = os.path.basename(input_structure).split('.')[0]
 
@@ -21,12 +21,12 @@ def relax_wt(input_structure, output_path, index,
         return E_wt
     else:
         utils.init_pyrosetta()
-        scorefxns = utils.initiate_scorefunction([scorefxn])    
+        scorefxns = utils.initiate_scorefunction([scorefxn],cartesian=cartesian)    
         wt_pose = utils.load_pose_and_membrane(input_structure)
 
         wt_pose = utils.relax_pose(
                 wt_pose, scorefxns[scorefxn], 
-                target_position=1, radius = 1000, sample_level=sample_level, cycles=cycles, cartesian=cartesian, constrained=constrained
+                target_position=None, sample_level=sample_level, cycles=cycles, cartesian=cartesian, constrained=constrained, ramp_constraints=ramp_constraints
             )
         
         E_wt = scorefxns[scorefxn].score(wt_pose)
@@ -69,10 +69,11 @@ if __name__ == '__main__':
     if args.params is None:
         relax_params = {
             'scorefxn':'franklin2019',
-            'sample_level':'chi',
+            'sample_level':'bb',
             'cycles':3,
             'constrained':True,
-            'cartesian':False
+            'ramp_constraints':True,
+            'cartesian':True
         }
     else:
         relax_params = json.load(open(args.params,'r'))
@@ -85,6 +86,7 @@ if __name__ == '__main__':
                        sample_level = relax_params['sample_level'], 
                        cycles = relax_params['cycles'], 
                        constrained=relax_params['constrained'], 
+                       ramp_constraints=relax_params['ramp_constraints'],
                        cartesian = relax_params['cartesian'])
     
     iter = range(args.n_struct)
