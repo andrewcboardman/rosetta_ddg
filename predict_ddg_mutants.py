@@ -7,6 +7,9 @@ import pandas as pd
 import argparse
 import utils
 import json
+from pyrosetta.toolbox.mutants import mutate_residue
+
+
 
 
 def estimate_ddg(wt_pose_id, mutant, 
@@ -17,23 +20,26 @@ def estimate_ddg(wt_pose_id, mutant,
     if not os.path.exists(mutant_pose_filepath):
         os.mkdir(mutant_pose_filepath)
 
-    if os.path.exists(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv'):
-        return pd.read_csv(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv')
+    if os.path.exists(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv') and (os.stat(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv').st_size != 0):
+        return pd.read_csv(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv')        
+            
     else:
         # Create placeholder file to prevent other processes working on this mutant
         open(f'{mutant_pose_filepath}/{wt_pose_id}_{mutant}.csv', 'a').close()
         utils.init_pyrosetta()
-
-        # setup score functions
-        scorefxns = utils.initiate_scorefunction(scorefxn_names)
-
+        
         # Default relax params
         if relax_params is None:
             relax_params = {
-                'sample_level': 'chi',
-                'radius': 9,
-                'num_bb_nbrs': 2
-            }
+            'sample_level':'chi',
+            'cycles':1,
+            'constrained':True,
+            'ramp_constraints':False,
+            'cartesian':True
+        }
+
+        # setup score functions
+        scorefxns = utils.initiate_scorefunction(scorefxn_names, cartesian=relax_params['cartesian'])
 
         wt_scores = []
         mutant_scores = []
@@ -58,13 +64,16 @@ def estimate_ddg(wt_pose_id, mutant,
             })
     
         # Mutate residue
-        mutant_pose = utils.mutate_residue(wt_pose, scorefxns['franklin2019'], mutant=mutant)
+        pos = int(mutant[1:-1])
+        mut_aa = mutant[-1]
+        mutant_pose =  wt_pose.clone()
+        mutate_residue(mutant_pose, pos, mut_aa, pack_scorefxn=scorefxns['franklin2019'], pack_radius=5.0)
         
         if relax_mutant:
             # Relax mutant structure
             mutant_pose = utils.relax_pose(
                 mutant_pose, scorefxns['franklin2019'], 
-                target_position=int(mutant[1:-1]), **relax_params, constrained=True, cycles = 1
+                target_position=int(mutant[1:-1]), **relax_params,
             )
 
         # dump mutant structure
@@ -76,7 +85,7 @@ def estimate_ddg(wt_pose_id, mutant,
             E_mut = scorefxn.score(mutant_pose)
             mutant_scores.append({
                     'decoy': wt_pose_id,
-                    'mutant': mutant,
+                    'rosetta_mutant': mutant,
                     'score_name': score_name,
                     'E_mut': E_mut
             })

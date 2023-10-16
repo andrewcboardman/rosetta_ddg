@@ -72,7 +72,7 @@ if __name__ == '__main__':
             'sample_level':'bb',
             'cycles':3,
             'constrained':True,
-            'ramp_constraints':True,
+            'ramp_constraints':False,
             'cartesian':True
         }
     else:
